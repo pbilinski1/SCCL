@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCCL Proposal 2: Financial Model - Bed Allocation & Cost Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1F4E78 0%, #2E75B5 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .section {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1F4E78;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2E75B5;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2E75B5;
+            box-shadow: 0 0 5px rgba(46, 117, 181, 0.3);
+        }
+        
+        .input-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2E75B5;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2E75B5;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .bed-split-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .bed-split-item {
+            text-align: center;
+        }
+        
+        .bed-split-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .bed-split-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E75B5;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
+            color: white;
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .btn-reset {
+            background: #ecf0f1;
+            color: #333;
+        }
+        
+        .btn-reset:hover {
+            background: #bdc3c7;
+        }
+        
+        .results-section {
+            grid-column: 1 / -1;
+            display: none;
+        }
+        
+        .results-section.active {
+            display: block;
+        }
+        
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-left: 4px solid #2E75B5;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .result-card.loss {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+        
+        .result-card.profit {
+            border-left-color: #27AE60;
+            background: #d5f4e6;
+        }
+        
+        .result-card.neutral {
+            border-left-color: #f39c12;
+            background: #fef5e7;
+        }
+        
+        .result-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1F4E78;
+        }
+        
+        .result-card.loss .result-value {
+            color: #c0392b;
+        }
+        
+        .result-card.profit .result-value {
+            color: #27AE60;
+        }
+        
+        .result-card.neutral .result-value {
+            color: #d68910;
+        }
+        
+        .pl-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        
+        .pl-table th {
+            background: #1F4E78;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        .pl-table td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+        }
+        
+        .pl-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .pl-table .section-row {
+            background: #e7f3ff;
+            font-weight: 600;
+            color: #1F4E78;
+        }
+        
+        .pl-table .total-row {
+            background: #d9e1f2;
+            font-weight: bold;
+            color: #1F4E78;
+        }
+        
+        .pl-table .indent {
+            padding-left: 30px;
+        }
+        
+        .cash-flow-container {
+            margin-top: 30px;
+        }
+        
+        .cash-flow-comparison {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .cash-flow-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .cash-flow-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .cash-flow-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2E75B5;
+        }
+        
+        .cash-flow-item.negative .value {
+            color: #e74c3c;
+        }
+        
+        .cash-flow-item.positive .value {
+            color: #27AE60;
+        }
+        
+        .financing-box {
+            background: #ffe6e6;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .financing-box strong {
+            color: #c0392b;
+        }
+        
+        .info-box {
+            background: #ecf0f1;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .cost-section {
+            margin-bottom: 25px;
+        }
+        
+        .cost-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1F4E78;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .range-box {
+            background: #f0f7ff;
+            border-left: 3px solid #2E75B5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .range-box span {
+            color: #2E75B5;
+            font-weight: bold;
+        }
+        
+        .percentage-input-group {
+            background: #fff3e0;
+            border-left: 3px solid #f39c12;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .percentage-input-group .section-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f39c12;
+            font-size: 16px;
+        }
+        
+        .percentage-group {
+            margin-bottom: 20px;
+        }
+        
+        .percentage-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .percentage-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .percentage-input-wrapper input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .percentage-input-wrapper span {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .current-value {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #856404;
+        }
+        
+        .cost-total-display {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #1F4E78;
+            font-weight: 600;
+            border-left: 3px solid #2E75B5;
+        }
+        
+        .cost-total-display .calc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+        
+        .two-col-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .cash-flow-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SCCL Financial Model: Proposal 2</h1>
+            <p>Interactive Decision Tool - Dementia & Nursing Care Bed Allocation</p>
+        </div>
+        
+        <div class="content">
+            <!-- LEFT COLUMN: BED ALLOCATION & RATES -->
+            <div class="section">
+                <div class="section-title">Step 1: Bed Allocation (Total 62 Beds)</div>
+                
+                <div class="slider-container">
+                    <div class="slider-labels">
+                        <span>Dementia Care Beds</span>
+                        <span>Nursing Care Beds</span>
+                    </div>
+                    <input type="range" id="nursingPercentage" min="0" max="100" value="0" step="1">
+                </div>
+                
+                <div class="bed-split-display">
+                    <div class="bed-split-item">
+                        <div class="label">Dementia Beds</div>
+                        <div class="value" id="dementiaBedCount">62</div>
+                    </div>
+                    <div class="bed-split-item">
+                        <div class="label">Nursing Beds</div>
+                        <div class="value" id="nursingBedCount">0</div>
+                    </div>
+                </div>
+                
+                <div class="section-title" style="margin-top: 30px;">Step 2: Weekly Rates per Bed (£)</div>
+                
+                <div class="form-group">
+                    <label for="dementiaRate">Dementia Care Rate (£/week)</label>
+                    <input type="number" id="dementiaRate" value="1000" min="700" max="1500" step="50">
+                    <div class="input-help">Range: £700 - £1,500 | Current proposal: £1,000</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nursingRate">Nursing Care Rate (£/week)</label>
+                    <input type="number" id="nursingRate" value="1200" min="1000" max="1800" step="50">
+                    <div class="input-help">Range: £1,000 - £1,800 | Premium over dementia rate</div>
+                </div>
+            </div>
+            
+            <!-- RIGHT COLUMN: COST INPUTS -->
+            <div class="section">
+                <div class="section-title">Step 3: Operating Cost Inputs (Annual)</div>
+                
+                <div class="cost-section">
+                    <div class="cost-section-title">Dementia Staffing (Annual)</div>
+                    <div class="range-box">
+                        Cost per staff: <span>£35,000 - £55,000</span>
+                    </div>
+                    <div class="two-col-inputs">
+                        <div class="form-group">
+                            <label for="dementiaStaffCost">Dementia staffing cost</label>
+                            <input type="number" id="dementiaStaffCost" value="45000" min="35000" max="55000" step="1000">
+                            <div class="input-help">Annual cost per dementia staff member</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dementiaNumStaff">Number of dementia staff</label>
+                            <input type="number" id="dementiaNumStaff" value="3" min="0" max="20" step="1">
+                            <div class="input-help">Total dementia staff count</div>
+                        </div>
+                    </div>
+                    <div class="cost-total-display">
+                        Total Dementia Staffing: £<span id="dementiaTotalDisplay">135000</span>
+                        <div class="calc">= <span id="dementiaNumStaffDisplay">3</span> staff × £<span id="dementiaStaffCostDisplay">45000</span></div>
+                    </div>
+                </div>
+                
+                <div class="cost-section">
+                    <div class="cost-section-title">Nursing RN & Clinical Staffing (Annual)</div>
+                    <div class="range-box">
+                        Cost per staff: <span>£30,000 - £45,000</span>
+                    </div>
+                    <div class="warning-box">
+                        ⚠️ Includes RN salaries, clinical governance, and professional fees.
+                    </div>
+                    <div class="two-col-inputs">
+                        <div class="form-group">
+                            <label for="nursingStaffCost">Nursing cost estimate</label>
+                            <input type="number" id="nursingStaffCost" value="30242" min="30000" max="45000" step="1000">
+                            <div class="input-help">Annual cost per nursing staff member</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nursingNumStaff">Number of nursing staff</label>
+                            <input type="number" id="nursingNumStaff" value="1" min="0" max="20" step="1">
+                            <div class="input-help">Total nursing staff count</div>
+                        </div>
+                    </div>
+                    <div class="cost-total-display">
+                        Total Nursing Staffing: £<span id="nursingTotalDisplay">30242</span>
+                        <div class="calc">= <span id="nursingNumStaffDisplay">1</span> staff × £<span id="nursingStaffCostDisplay">30242</span></div>
+                    </div>
+                </div>
+                
+                <div class="cost-section">
+                    <div class="cost-section-title">Year 1 Transition Costs (One-Time)</div>
+                    <div class="range-box">
+                        Range: <span>£78,000 - £160,000</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="transitionCost">Your Estimate (£)</label>
+                        <input type="number" id="transitionCost" value="120000" min="78000" max="160000" step="5000">
+                        <div class="input-help">Staff turnover, recruitment, training, change management</div>
+                    </div>
+                </div>
+
+                <div class="cost-section">
+                    <div class="cost-section-title">CQC Dual Registration (One-Time, Year 1)</div>
+                    <div class="range-box">
+                        Range: <span>£8,000 - £15,000</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="cqcCost">Your Estimate (£)</label>
+                        <input type="number" id="cqcCost" value="11500" min="8000" max="15000" step="1000">
+                        <div class="input-help">CQC registration application and compliance setup (nursing registration)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CAPEX & INFLATION SECTION -->
+            <div class="section">
+                <div class="section-title">Step 4: Capital Expenditure (CAPEX) & Inflation</div>
+                
+                <div class="cost-section">
+                    <div class="cost-section-title">Annual Inflation Rate (%)</div>
+                    <div class="range-box">
+                        Typical range: <span>0% - 5%</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="inflationRate">Operating Cost Inflation Rate (%)</label>
+                        <div class="percentage-input-wrapper">
+                            <input type="number" id="inflationRate" value="2" min="0" max="10" step="0.5">
+                            <span>%</span>
+                        </div>
+                        <div class="input-help">Annual inflation applied to staffing costs. Base CoS, admin, and one-time costs remain fixed.</div>
+                    </div>
+                </div>
+                
+                <div class="cost-section">
+                    <div class="cost-section-title">Phase 1 - Year 1</div>
+                    <div class="range-box">
+                        Range: <span>£15,000 - £30,000</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="capexPhase1">Your Estimate (£)</label>
+                        <input type="number" id="capexPhase1" value="22500" min="15000" max="30000" step="2500">
+                        <div class="input-help">Bathroom/medical upgrades, IT systems, equipment</div>
+                    </div>
+                </div>
+                
+                <div class="cost-section">
+                    <div class="cost-section-title">Phase 2 - Year 2</div>
+                    <div class="range-box">
+                        Range: <span>£165,000 - £282,000</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="capexPhase2">Your Estimate (£)</label>
+                        <input type="number" id="capexPhase2" value="231000" min="165000" max="282000" step="10000">
+                        <div class="input-help">Bedroom adaptation, nursing facilities, advanced equipment</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PERCENTAGE INCREASE INPUTS -->
+            <div class="section percentage-input-group">
+                <div style="color: #333; font-weight: bold; margin-bottom: 15px;">Step 5: Cost of Sales & Admin Increase Adjustments</div>
+                
+                <div class="percentage-group">
+                    <label for="cosIncreasePercent">Cost of Sales Increase (%)</label>
+                    <div class="percentage-input-wrapper">
+                        <input type="number" id="cosIncreasePercent" value="0" min="-50" max="50" step="1">
+                        <span>%</span>
+                    </div>
+                    <div class="current-value">Current Cost of Sales baseline: £2,220,000</div>
+                    <div class="input-help">Enter the percentage increase (positive) or decrease (negative) to apply to base CoS of £2,220,000</div>
+                </div>
+                
+                <div class="percentage-group">
+                    <label for="adminIncreasePercent">Administrative Costs Increase (%)</label>
+                    <div class="percentage-input-wrapper">
+                        <input type="number" id="adminIncreasePercent" value="0" min="-50" max="50" step="1">
+                        <span>%</span>
+                    </div>
+                    <div class="current-value">Current Admin baseline: £660,000</div>
+                    <div class="input-help">Enter the percentage increase (positive) or decrease (negative) to apply to base Admin of £660,000.</div>
+                </div>
+            </div>
+            
+            <!-- BUTTONS -->
+            <div class="section">
+                <div class="button-group">
+                    <button class="btn-calculate" onclick="calculateFinancials()">Calculate Financial Impact</button>
+                    <button class="btn-reset" onclick="resetForm()">Reset to Defaults</button>
+                </div>
+            </div>
+            
+            <!-- RESULTS SECTION -->
+            <div class="section results-section" id="resultsSection">
+                <div class="section-title">Financial Results Summary</div>
+                
+                <div class="results-container" id="resultsContainer"></div>
+                
+                <div class="financing-box" id="financingBox"></div>
+                
+                <h3 style="margin-top: 30px; margin-bottom: 15px; color: #1F4E78;">Year 1 Income Statement</h3>
+                <table class="pl-table" id="plTable"></table>
+                
+                <div class="cash-flow-container">
+                    <h3 style="margin-bottom: 15px; color: #1F4E78;">Three-Year Cash Flow Projection</h3>
+                    <div class="cash-flow-comparison" id="cashFlowComparison"></div>
+                </div>
+                
+                <div class="info-box" id="insightsBox"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const TOTAL_BEDS = 62;
+        const WEEKS_PER_YEAR = 52;
+        const BASE_COS = 2220000;
+        const BASE_ADMIN = 660000;
+        const CONTRACT_FEE = 255000;
+        
+        document.getElementById('nursingPercentage').addEventListener('input', updateBedCount);
+        document.getElementById('dementiaStaffCost').addEventListener('input', updateDementiaCostDisplay);
+        document.getElementById('dementiaNumStaff').addEventListener('input', updateDementiaCostDisplay);
+        document.getElementById('nursingStaffCost').addEventListener('input', updateNursingCostDisplay);
+        document.getElementById('nursingNumStaff').addEventListener('input', updateNursingCostDisplay);
+        
+        function updateBedCount() {
+            const nursingPercentage = parseInt(document.getElementById('nursingPercentage').value);
+            const nursingBeds = Math.round(TOTAL_BEDS * nursingPercentage / 100);
+            const dementiaBeds = TOTAL_BEDS - nursingBeds;
+            
+            document.getElementById('dementiaBedCount').textContent = dementiaBeds;
+            document.getElementById('nursingBedCount').textContent = nursingBeds;
+        }
+        
+        function updateDementiaCostDisplay() {
+            const dementiaStaffCost = parseFloat(document.getElementById('dementiaStaffCost').value);
+            const dementiaNumStaff = parseInt(document.getElementById('dementiaNumStaff').value);
+            const totalCost = dementiaNumStaff * dementiaStaffCost;
+            document.getElementById('dementiaTotalDisplay').textContent = totalCost.toLocaleString('en-GB', {maximumFractionDigits: 0});
+            document.getElementById('dementiaStaffCostDisplay').textContent = dementiaStaffCost.toLocaleString('en-GB');
+            document.getElementById('dementiaNumStaffDisplay').textContent = dementiaNumStaff;
+        }
+        
+        function updateNursingCostDisplay() {
+            const nursingStaffCost = parseFloat(document.getElementById('nursingStaffCost').value);
+            const nursingNumStaff = parseInt(document.getElementById('nursingNumStaff').value);
+            const totalCost = nursingNumStaff * nursingStaffCost;
+            document.getElementById('nursingTotalDisplay').textContent = totalCost.toLocaleString('en-GB', {maximumFractionDigits: 0});
+            document.getElementById('nursingStaffCostDisplay').textContent = nursingStaffCost.toLocaleString('en-GB');
+            document.getElementById('nursingNumStaffDisplay').textContent = nursingNumStaff;
+        }
+        
+        function formatCurrency(val) {
+            if (val === 0) return '£0';
+            const isNegative = val < 0;
+            const absVal = Math.abs(val);
+            return (isNegative ? '-' : '') + '£' + absVal.toLocaleString('en-GB', {maximumFractionDigits: 0});
+        }
+        
+        function calculateFinancials() {
+            const nursingPercentage = parseInt(document.getElementById('nursingPercentage').value);
+            const nursingBeds = Math.round(TOTAL_BEDS * nursingPercentage / 100);
+            const dementiaBeds = TOTAL_BEDS - nursingBeds;
+            
+            const dementiaRate = parseFloat(document.getElementById('dementiaRate').value);
+            const nursingRate = parseFloat(document.getElementById('nursingRate').value);
+            
+            // Staff numbers determine costs
+            const dementiaStaffCost = parseFloat(document.getElementById('dementiaStaffCost').value);
+            const dementiaNumStaff = parseInt(document.getElementById('dementiaNumStaff').value);
+            
+            const nursingStaffCost = parseFloat(document.getElementById('nursingStaffCost').value);
+            const nursingNumStaff = parseInt(document.getElementById('nursingNumStaff').value);
+            
+            // Calculate total staffing costs for Year 1
+            const dementiaCostYear1 = dementiaNumStaff * dementiaStaffCost;
+            const nursingCostYear1 = nursingNumStaff * nursingStaffCost;
+            
+            const transitionCost = parseFloat(document.getElementById('transitionCost').value);
+            const cqcCost = parseFloat(document.getElementById('cqcCost').value);
+            const capexPhase1 = parseFloat(document.getElementById('capexPhase1').value);
+            const capexPhase2 = parseFloat(document.getElementById('capexPhase2').value);
+            
+            // Get inflation and percentage adjustments
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) || 0;
+            const cosIncreasePercent = parseFloat(document.getElementById('cosIncreasePercent').value) || 0;
+            const adminIncreasePercent = parseFloat(document.getElementById('adminIncreasePercent').value) || 0;
+            
+            // Calculate adjusted CoS and Admin
+            const adjustedBaseCos = BASE_COS * (1 + cosIncreasePercent / 100);
+            const adjustedAdmin = BASE_ADMIN * (1 + adminIncreasePercent / 100);
+            
+            // Calculate revenues - based on bed allocation
+            const dementiaRevenue = dementiaBeds * dementiaRate * WEEKS_PER_YEAR;
+            const nursingRevenue = nursingBeds * nursingRate * WEEKS_PER_YEAR;
+            const totalRevenue = dementiaRevenue + nursingRevenue + CONTRACT_FEE;
+            
+            // Calculate total cost of sales (adjusted base + staffing costs)
+            const totalCosStaffing = dementiaCostYear1 + nursingCostYear1;
+            const totalCosYear1 = adjustedBaseCos + totalCosStaffing;
+            
+            // Calculate Gross Profit
+            const grossProfitYear1 = totalRevenue - totalCosYear1;
+            
+            // Calculate total admin
+            const totalAdminYear1 = adjustedAdmin;
+            
+            // Calculate EBITDA
+            const ebitdaYear1 = grossProfitYear1 - totalAdminYear1;
+            
+            // Calculate depreciation
+            const depreciation = (capexPhase1 + capexPhase2) / 10;
+            
+            // Year 1 calculations
+            const year1OneTimeCosts = transitionCost + cqcCost;
+            const year1OperatingProfit = ebitdaYear1 - year1OneTimeCosts;
+            const year1OperatingCash = year1OperatingProfit;
+            const year1NetCash = year1OperatingCash - capexPhase1;
+            
+            // Year 2 - apply inflation to staffing costs
+            const dementiaCostYear2 = dementiaCostYear1 * (1 + inflationRate / 100);
+            const nursingCostYear2 = nursingCostYear1 * (1 + inflationRate / 100);
+            const totalCosStaffingYear2 = dementiaCostYear2 + nursingCostYear2;
+            const totalCosYear2 = adjustedBaseCos + totalCosStaffingYear2;
+            const grossProfitYear2 = totalRevenue - totalCosYear2;
+            const ebitdaYear2 = grossProfitYear2 - totalAdminYear1;
+            
+            const year2OperatingProfit = ebitdaYear2 - (capexPhase1 / 10);
+            const year2OperatingCash = year2OperatingProfit + (capexPhase1 / 10);
+            const year2NetCash = year2OperatingCash - capexPhase2;
+            
+            // Year 3 - apply inflation again (compounding)
+            const dementiaCostYear3 = dementiaCostYear2 * (1 + inflationRate / 100);
+            const nursingCostYear3 = nursingCostYear2 * (1 + inflationRate / 100);
+            const totalCosStaffingYear3 = dementiaCostYear3 + nursingCostYear3;
+            const totalCosYear3 = adjustedBaseCos + totalCosStaffingYear3;
+            const grossProfitYear3 = totalRevenue - totalCosYear3;
+            const ebitdaYear3 = grossProfitYear3 - totalAdminYear1;
+            
+            const year3OperatingProfit = ebitdaYear3 - depreciation;
+            const year3OperatingCash = year3OperatingProfit + depreciation;
+            const year3NetCash = year3OperatingCash;
+            
+            // Calculate cumulative financing requirement
+            const negativeYears = [];
+            if (year1NetCash < 0) negativeYears.push(year1NetCash);
+            if (year2NetCash < 0) negativeYears.push(year2NetCash);
+            const cumulativeFinancing = negativeYears.reduce((sum, val) => sum + val, 0);
+            const maxFinancing = Math.abs(Math.min(...negativeYears, 0));
+            
+            // Display results
+            displayResults({
+                dementiaBeds, nursingBeds,
+                dementiaRate, nursingRate,
+                dementiaRevenue, nursingRevenue, totalRevenue,
+                adjustedBaseCos, dementiaCostYear1, nursingCostYear1, totalCosStaffing, totalCos: totalCosYear1, grossProfit: grossProfitYear1,
+                adjustedAdmin: totalAdminYear1, totalAdmin: totalAdminYear1, ebitda: ebitdaYear1,
+                transitionCost, cqcCost, year1OneTimeCosts,
+                year1OperatingProfit, year1NetCash,
+                year2OperatingProfit, year2NetCash,
+                year3OperatingProfit, year3NetCash,
+                depreciation, capexPhase1, capexPhase2,
+                cosIncreasePercent, adminIncreasePercent, inflationRate,
+                cumulativeFinancing, maxFinancing, negativeYears,
+                dementiaNumStaff, nursingNumStaff
+            });
+        }
+        
+        function displayResults(data) {
+            const getCardClass = (value) => {
+                if (value < 0) return 'loss';
+                if (value > 100000) return 'profit';
+                return 'neutral';
+            };
+            
+            const resultsHTML = `
+                <div class="result-card ${getCardClass(data.year1OperatingProfit)}">
+                    <div class="result-label">Year 1 Operating Profit</div>
+                    <div class="result-value">${formatCurrency(data.year1OperatingProfit)}</div>
+                </div>
+                <div class="result-card ${getCardClass(data.year2OperatingProfit)}">
+                    <div class="result-label">Year 2 Operating Profit</div>
+                    <div class="result-value">${formatCurrency(data.year2OperatingProfit)}</div>
+                </div>
+                <div class="result-card ${getCardClass(data.year3OperatingProfit)}">
+                    <div class="result-label">Year 3 Operating Profit</div>
+                    <div class="result-value">${formatCurrency(data.year3OperatingProfit)}</div>
+                </div>
+            `;
+            document.getElementById('resultsContainer').innerHTML = resultsHTML;
+            
+            // Financing box
+            const financingHTML = `
+                <strong>Financing Requirement:</strong><br>
+                Maximum annual need: £${Math.abs(data.maxFinancing).toLocaleString('en-GB', {maximumFractionDigits: 0})}<br>
+                Cumulative facility needed (Years 1-2): £${Math.abs(data.cumulativeFinancing).toLocaleString('en-GB', {maximumFractionDigits: 0})}<br>
+                ${data.negativeYears.length === 0 ? '<br>✓ Positive cash flow in all years - no external financing required.' : ''}
+            `;
+            document.getElementById('financingBox').innerHTML = financingHTML;
+            
+            const plHTML = `
+                <tr class="section-row">
+                    <td colspan="2" style="font-weight: bold;">REVENUE</td>
+                </tr>
+                <tr>
+                    <td class="indent">Dementia Beds (${data.dementiaBeds} @ £${data.dementiaRate.toLocaleString('en-GB')}/week)</td>
+                    <td style="text-align: right;">${formatCurrency(data.dementiaRevenue)}</td>
+                </tr>
+                <tr>
+                    <td class="indent">Nursing Beds (${data.nursingBeds} @ £${data.nursingRate.toLocaleString('en-GB')}/week)</td>
+                    <td style="text-align: right;">${formatCurrency(data.nursingRevenue)}</td>
+                </tr>
+                <tr>
+                    <td class="indent">Contract Management Fee</td>
+                    <td style="text-align: right;">${formatCurrency(CONTRACT_FEE)}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>TOTAL REVENUE</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalRevenue)}</td>
+                </tr>
+                <tr class="section-row">
+                    <td colspan="2" style="font-weight: bold;">COST OF SALES</td>
+                </tr>
+                <tr>
+                    <td class="indent">Base Cost of Sales (£2,220,000 adjusted ${data.cosIncreasePercent > 0 ? '+' : ''}${data.cosIncreasePercent}%)</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedBaseCos)}</td>
+                </tr>
+                <tr>
+                    <td class="indent">Dementia Staffing (${data.dementiaNumStaff} staff)</td>
+                    <td style="text-align: right;">${formatCurrency(data.dementiaCostYear1)}</td>
+                </tr>
+                <tr>
+                    <td class="indent">Nursing RN & Clinical (${data.nursingNumStaff} staff)</td>
+                    <td style="text-align: right;">${formatCurrency(data.nursingCostYear1)}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>TOTAL COST OF SALES</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalCos)}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>GROSS PROFIT</td>
+                    <td style="text-align: right;">${formatCurrency(data.grossProfit)}</td>
+                </tr>
+                <tr class="section-row">
+                    <td colspan="2" style="font-weight: bold;">OPERATING EXPENSES</td>
+                </tr>
+                <tr>
+                    <td class="indent">Base Administrative (£660,000 adjusted ${data.adminIncreasePercent > 0 ? '+' : ''}${data.adminIncreasePercent}%)</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>TOTAL OPERATING EXPENSES</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalAdmin)}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>EBITDA</td>
+                    <td style="text-align: right;">${formatCurrency(data.ebitda)}</td>
+                </tr>
+                <tr class="section-row">
+                    <td colspan="2" style="font-weight: bold;">DEPRECIATION</td>
+                </tr>
+                <tr>
+                    <td class="indent">CAPEX Depreciation</td>
+                    <td style="text-align: right;">£0</td>
+                </tr>
+                <tr class="section-row">
+                    <td colspan="2" style="font-weight: bold;">YEAR 1 ADJUSTMENTS (One-Time)</td>
+                </tr>
+                <tr>
+                    <td class="indent">Transition Costs</td>
+                    <td style="text-align: right;">${formatCurrency(-data.transitionCost)}</td>
+                </tr>
+                <tr>
+                    <td class="indent">CQC Dual Registration (Nursing)</td>
+                    <td style="text-align: right;">${formatCurrency(-data.cqcCost)}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>Total Year 1 One-Time Costs</td>
+                    <td style="text-align: right;">${formatCurrency(-data.year1OneTimeCosts)}</td>
+                </tr>
+                <tr class="total-row" style="background: ${data.year1OperatingProfit < 0 ? '#ffcccc' : '#ccffcc'};">
+                    <td>YEAR 1 OPERATING PROFIT/(LOSS)</td>
+                    <td style="text-align: right; color: ${data.year1OperatingProfit < 0 ? '#c00000' : '#00a000'};">${formatCurrency(data.year1OperatingProfit)}</td>
+                </tr>
+            `;
+            document.getElementById('plTable').innerHTML = plHTML;
+            
+            const cashFlowHTML = `
+                <div class="cash-flow-item ${data.year1NetCash < 0 ? 'negative' : 'positive'}">
+                    <div class="label">Year 1 Net Cash Flow</div>
+                    <div class="value">${formatCurrency(data.year1NetCash)}</div>
+                    <div class="input-help" style="margin-top: 8px; font-size: 11px;">After CAPEX Phase 1</div>
+                </div>
+                <div class="cash-flow-item ${data.year2NetCash < 0 ? 'negative' : 'positive'}">
+                    <div class="label">Year 2 Net Cash Flow</div>
+                    <div class="value">${formatCurrency(data.year2NetCash)}</div>
+                    <div class="input-help" style="margin-top: 8px; font-size: 11px;">After CAPEX Phase 2 (Inflation: ${data.inflationRate}%)</div>
+                </div>
+                <div class="cash-flow-item positive">
+                    <div class="label">Year 3 Net Cash Flow</div>
+                    <div class="value">${formatCurrency(data.year3NetCash)}</div>
+                    <div class="input-help" style="margin-top: 8px; font-size: 11px;">No CAPEX, Inflation: ${data.inflationRate}%</div>
+                </div>
+            `;
+            document.getElementById('cashFlowComparison').innerHTML = cashFlowHTML;
+            
+            generateInsights(data);
+            document.getElementById('resultsSection').classList.add('active');
+        }
+        
+        function generateInsights(data) {
+            const totalCashInvested = data.capexPhase1 + data.capexPhase2;
+            const threYearCumulative = data.year1NetCash + data.year2NetCash + data.year3NetCash;
+            
+            const insights = `
+                <strong>Key Insights:</strong><br><br>
+                • <strong>Bed Allocation:</strong> ${data.dementiaBeds} dementia beds @ £${data.dementiaRate}/week, ${data.nursingBeds} nursing beds @ £${data.nursingRate}/week<br><br>
+                • <strong>Staff Structure:</strong> ${data.dementiaNumStaff} dementia staff, ${data.nursingNumStaff} nursing staff<br><br>
+                • <strong>Annual Revenue:</strong> ${formatCurrency(data.totalRevenue)} total<br><br>
+                • <strong>Staffing Costs (Year 1):</strong> Dementia £${data.dementiaCostYear1.toLocaleString('en-GB', {maximumFractionDigits: 0})} + Nursing £${data.nursingCostYear1.toLocaleString('en-GB', {maximumFractionDigits: 0})} = ${formatCurrency(data.dementiaCostYear1 + data.nursingCostYear1)}<br><br>
+                • <strong>Cost of Sales:</strong> Base £${data.adjustedBaseCos.toLocaleString('en-GB', {maximumFractionDigits: 0})} + Staffing £${(data.dementiaCostYear1 + data.nursingCostYear1).toLocaleString('en-GB', {maximumFractionDigits: 0})} = ${formatCurrency(data.totalCos)}<br><br>
+                • <strong>Operating Profitability:</strong> EBITDA of ${formatCurrency(data.ebitda)} before Year 1 one-time costs<br><br>
+                • <strong>Inflation Impact:</strong> Staffing costs increase by ${data.inflationRate}% annually in Years 2-3<br><br>
+                • <strong>Year 1 One-Time Costs:</strong> Transition £${data.transitionCost.toLocaleString('en-GB')} + CQC Registration £${data.cqcCost.toLocaleString('en-GB')} = ${formatCurrency(data.year1OneTimeCosts)}<br><br>
+                ${data.year1OperatingProfit < 0 ? 
+                    '• <strong>Year 1:</strong> Operating loss of ' + formatCurrency(data.year1OperatingProfit) + ' due to one-time costs<br><br>' :
+                    '• <strong>Year 1:</strong> Operating profit of ' + formatCurrency(data.year1OperatingProfit) + ' despite one-time costs<br><br>'
+                }
+                ${data.year1NetCash < 0 ? 
+                    '• <strong>Cash Year 1:</strong> Net outflow of ' + formatCurrency(Math.abs(data.year1NetCash)) + '<br><br>' :
+                    '• <strong>Cash Year 1:</strong> Positive cash generation of ' + formatCurrency(data.year1NetCash) + '<br><br>'
+                }
+                ${data.year2NetCash < 0 ? 
+                    '• <strong>Cash Year 2:</strong> Net outflow of ' + formatCurrency(Math.abs(data.year2NetCash)) + ' due to Phase 2 CAPEX investment<br><br>' :
+                    '• <strong>Cash Year 2:</strong> Positive cash generation of ' + formatCurrency(data.year2NetCash) + '<br><br>'
+                }
+                • <strong>Year 3 & Beyond:</strong> Strong cash generation of ${formatCurrency(data.year3NetCash)} annually<br><br>
+                • <strong>3-Year Cumulative:</strong> ${threYearCumulative > 0 ? 'Positive' : 'Negative'} net cash position of ${formatCurrency(threYearCumulative)} after £${totalCashInvested.toLocaleString('en-GB')} investment
+            `;
+            
+            document.getElementById('insightsBox').innerHTML = insights;
+        }
+        
+        function resetForm() {
+            document.getElementById('nursingPercentage').value = 0;
+            document.getElementById('dementiaRate').value = '1000';
+            document.getElementById('nursingRate').value = '1200';
+            document.getElementById('dementiaStaffCost').value = '45000';
+            document.getElementById('dementiaNumStaff').value = '3';
+            document.getElementById('nursingStaffCost').value = '30242';
+            document.getElementById('nursingNumStaff').value = '1';
+            document.getElementById('transitionCost').value = '120000';
+            document.getElementById('cqcCost').value = '11500';
+            document.getElementById('inflationRate').value = '2';
+            document.getElementById('capexPhase1').value = '22500';
+            document.getElementById('capexPhase2').value = '231000';
+            document.getElementById('cosIncreasePercent').value = '0';
+            document.getElementById('adminIncreasePercent').value = '0';
+            document.getElementById('resultsSection').classList.remove('active');
+            updateBedCount();
+            updateDementiaCostDisplay();
+            updateNursingCostDisplay();
+        }
+    </script>
+</body>
+</html>
