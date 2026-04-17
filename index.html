@@ -867,8 +867,8 @@
                 dementiaBeds, nursingBeds,
                 dementiaRate, nursingRate,
                 dementiaRevenue, nursingRevenue, totalRevenue,
-                adjustedBaseCos, dementiaCostYear1, nursingCostYear1, totalCosStaffing, totalCos: totalCosYear1, grossProfit: grossProfitYear1,
-                adjustedAdmin: totalAdminYear1, totalAdmin: totalAdminYear1, ebitda: ebitdaYear1,
+                adjustedBaseCos, dementiaCostYear1, nursingCostYear1, dementiaCostYear2, nursingCostYear2, dementiaCostYear3, nursingCostYear3, totalCosStaffing, totalCos: totalCosYear1, totalCosYear2, totalCosYear3, grossProfit: grossProfitYear1, grossProfitYear2, grossProfitYear3,
+                adjustedAdmin: totalAdminYear1, totalAdmin: totalAdminYear1, ebitda: ebitdaYear1, ebitdaYear2, ebitdaYear3,
                 transitionCost, cqcCost, year1OneTimeCosts,
                 year1OperatingProfit, year1NetCash,
                 year2OperatingProfit, year2NetCash,
@@ -914,90 +914,129 @@
             
             const plHTML = `
                 <tr class="section-row">
-                    <td colspan="2" style="font-weight: bold;">REVENUE</td>
+                    <td colspan="4" style="font-weight: bold;">REVENUE</td>
                 </tr>
                 <tr>
                     <td class="indent">Dementia Beds (${data.dementiaBeds} @ £${data.dementiaRate.toLocaleString('en-GB')}/week)</td>
+                    <td style="text-align: right;">${formatCurrency(data.dementiaRevenue)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.dementiaRevenue)}</td>
                     <td style="text-align: right;">${formatCurrency(data.dementiaRevenue)}</td>
                 </tr>
                 <tr>
                     <td class="indent">Nursing Beds (${data.nursingBeds} @ £${data.nursingRate.toLocaleString('en-GB')}/week)</td>
                     <td style="text-align: right;">${formatCurrency(data.nursingRevenue)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.nursingRevenue)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.nursingRevenue)}</td>
                 </tr>
                 <tr>
                     <td class="indent">Contract Management Fee</td>
+                    <td style="text-align: right;">${formatCurrency(CONTRACT_FEE)}</td>
+                    <td style="text-align: right;">${formatCurrency(CONTRACT_FEE)}</td>
                     <td style="text-align: right;">${formatCurrency(CONTRACT_FEE)}</td>
                 </tr>
                 <tr class="total-row">
                     <td>TOTAL REVENUE</td>
                     <td style="text-align: right;">${formatCurrency(data.totalRevenue)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalRevenue)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalRevenue)}</td>
                 </tr>
                 <tr class="section-row">
-                    <td colspan="2" style="font-weight: bold;">COST OF SALES</td>
+                    <td colspan="4" style="font-weight: bold;">COST OF SALES</td>
                 </tr>
                 <tr>
                     <td class="indent">Base Cost of Sales (£2,220,000 adjusted ${data.cosIncreasePercent > 0 ? '+' : ''}${data.cosIncreasePercent}%)</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedBaseCos)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedBaseCos)}</td>
                     <td style="text-align: right;">${formatCurrency(data.adjustedBaseCos)}</td>
                 </tr>
                 <tr>
                     <td class="indent">Dementia Staffing (${data.dementiaNumStaff} staff)</td>
                     <td style="text-align: right;">${formatCurrency(data.dementiaCostYear1)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.dementiaCostYear2)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.dementiaCostYear3)}</td>
                 </tr>
                 <tr>
                     <td class="indent">Nursing RN & Clinical (${data.nursingNumStaff} staff)</td>
                     <td style="text-align: right;">${formatCurrency(data.nursingCostYear1)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.nursingCostYear2)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.nursingCostYear3)}</td>
                 </tr>
                 <tr class="total-row">
                     <td>TOTAL COST OF SALES</td>
-                    <td style="text-align: right;">${formatCurrency(data.totalCos)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalCosYear1)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalCosYear2)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.totalCosYear3)}</td>
                 </tr>
                 <tr class="total-row">
                     <td>GROSS PROFIT</td>
-                    <td style="text-align: right;">${formatCurrency(data.grossProfit)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.grossProfitYear1)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.grossProfitYear2)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.grossProfitYear3)}</td>
                 </tr>
                 <tr class="section-row">
-                    <td colspan="2" style="font-weight: bold;">OPERATING EXPENSES</td>
+                    <td colspan="4" style="font-weight: bold;">OPERATING EXPENSES</td>
                 </tr>
                 <tr>
                     <td class="indent">Base Administrative (£660,000 adjusted ${data.adminIncreasePercent > 0 ? '+' : ''}${data.adminIncreasePercent}%)</td>
                     <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
                 </tr>
                 <tr class="total-row">
                     <td>TOTAL OPERATING EXPENSES</td>
-                    <td style="text-align: right;">${formatCurrency(data.totalAdmin)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.adjustedAdmin)}</td>
                 </tr>
                 <tr class="total-row">
                     <td>EBITDA</td>
-                    <td style="text-align: right;">${formatCurrency(data.ebitda)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.ebitdaYear1)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.ebitdaYear2)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.ebitdaYear3)}</td>
                 </tr>
                 <tr class="section-row">
-                    <td colspan="2" style="font-weight: bold;">DEPRECIATION</td>
+                    <td colspan="4" style="font-weight: bold;">DEPRECIATION</td>
                 </tr>
                 <tr>
                     <td class="indent">CAPEX Depreciation</td>
                     <td style="text-align: right;">£0</td>
+                    <td style="text-align: right;">${formatCurrency(data.depreciation)}</td>
+                    <td style="text-align: right;">${formatCurrency(data.depreciation)}</td>
                 </tr>
                 <tr class="section-row">
-                    <td colspan="2" style="font-weight: bold;">YEAR 1 ADJUSTMENTS (One-Time)</td>
+                    <td colspan="4" style="font-weight: bold;">YEAR 1 ADJUSTMENTS (One-Time)</td>
                 </tr>
                 <tr>
                     <td class="indent">Transition Costs</td>
                     <td style="text-align: right;">${formatCurrency(-data.transitionCost)}</td>
+                    <td style="text-align: right;">£0</td>
+                    <td style="text-align: right;">£0</td>
                 </tr>
                 <tr>
                     <td class="indent">CQC Dual Registration (Nursing)</td>
                     <td style="text-align: right;">${formatCurrency(-data.cqcCost)}</td>
+                    <td style="text-align: right;">£0</td>
+                    <td style="text-align: right;">£0</td>
                 </tr>
                 <tr class="total-row">
                     <td>Total Year 1 One-Time Costs</td>
                     <td style="text-align: right;">${formatCurrency(-data.year1OneTimeCosts)}</td>
+                    <td style="text-align: right;">£0</td>
+                    <td style="text-align: right;">£0</td>
                 </tr>
                 <tr class="total-row" style="background: ${data.year1OperatingProfit < 0 ? '#ffcccc' : '#ccffcc'};">
-                    <td>YEAR 1 OPERATING PROFIT/(LOSS)</td>
+                    <td>OPERATING PROFIT/(LOSS)</td>
                     <td style="text-align: right; color: ${data.year1OperatingProfit < 0 ? '#c00000' : '#00a000'};">${formatCurrency(data.year1OperatingProfit)}</td>
+                    <td style="text-align: right; color: ${data.year2OperatingProfit < 0 ? '#c00000' : '#00a000'};">${formatCurrency(data.year2OperatingProfit)}</td>
+                    <td style="text-align: right; color: ${data.year3OperatingProfit < 0 ? '#c00000' : '#00a000'};">${formatCurrency(data.year3OperatingProfit)}</td>
                 </tr>
             `;
-            document.getElementById('plTable').innerHTML = plHTML;
+            
+            // Add header row for years
+            const headerRow = `<tr style="background: #2E75B5; color: white; font-weight: bold; text-align: center;"><td style="text-align: left;">Line Item</td><td>Year 1</td><td>Year 2</td><td>Year 3</td></tr>`;
+            const plTableHTML = headerRow + plHTML;
+            
+            document.getElementById('plTable').innerHTML = plTableHTML;
             
             const cashFlowHTML = `
                 <div class="cash-flow-item ${data.year1NetCash < 0 ? 'negative' : 'positive'}">
